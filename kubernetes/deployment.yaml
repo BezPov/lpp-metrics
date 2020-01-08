@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lpp-metrics
+spec:
+  selector:
+    matchLabels:
+      app: lpp-metrics
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lpp-metrics
+    spec:
+      containers:
+        - image: bezpov/lpp-metrics:1.0.1
+          name: lpp-metrics-container
+          env:
+            - name: ETCD_SERVER
+              value: "http://etcd-client:2379"
+          ports:
+            - containerPort: 8050
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8050
+            initialDelaySeconds: 20
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8050
+            initialDelaySeconds: 20
+            periodSeconds: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lpp-metrics-service
+  namespace: default
+  labels:
+    app: lpp-metrics
+spec:
+  ports:
+    - protocol: TCP
+      port: 50
+      targetPort: 8050
+  selector:
+    app: lpp-metrics
+  type: NodePort
