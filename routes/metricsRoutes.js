@@ -1,8 +1,38 @@
+const MetricsApi = require('../api/metricsApi');
+
 const initRoutes = function (server) {
-    server.get('/', function (req, res, next) {
-        res.json({
-            status: 'OK'
-        });
+    server.get('/', async function (req, res, next) {
+        const metricsForService = await MetricsApi.getMetricsForService();
+
+        if (metricsForService) {
+            res.json({
+                success: true,
+                data: metricsForService
+            });
+        } else {
+            res.json(500, {
+                success: false,
+                message: 'Metrics not found'
+            });
+        }
+
+        return next();
+    });
+
+    server.get('/:serviceName', async function (req, res, next) {
+        const metricsForService = await MetricsApi.getMetricsForService(req.params.serviceName);
+
+        if (metricsForService) {
+            res.json({
+                success: true,
+                data: metricsForService
+            });
+        } else {
+            res.json(500, {
+                success: false,
+                message: 'Metrics not found'
+            });
+        }
 
         return next();
     });

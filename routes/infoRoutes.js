@@ -5,7 +5,7 @@ const initRoutes = function (server) {
         res.json({
             name: 'lpp-metrics',
             version: process.env.npm_package_version,
-            description: 'Api gateway'
+            description: 'Service for handling metrics'
         });
 
         return next();

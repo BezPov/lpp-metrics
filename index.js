@@ -31,6 +31,14 @@ setupCors(server);
 
 require('./routes/init')(server);
 
+const MetricsApi = require('./api/metricsApi');
+
+const onMessageReceived = function (message) {
+    MetricsApi.addNewMetric(message.content.toString());
+};
+
+const rabbitMQ = require('./services/rabbitMQ')(onMessageReceived);
+
 server.listen(8050, () => {
     console.log(`${options.name} ${options.version} listening at ${server.url}`);
 
