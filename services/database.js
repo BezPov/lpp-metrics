@@ -3,56 +3,60 @@ const mongoose = require('mongoose');
 const etcd = require('./etcd');
 
 const connectionOptions = {
-    promiseLibrary: global.Promise,
-    server: {
-        auto_reconnect: true,
-        reconnectTries: Number.MAX_VALUE,
-        reconnectInterval: 1000
-    },
-    config: {
-        autoIndex: true
-    },
-    useNewUrlParser: true
+	promiseLibrary: global.Promise,
+	server: {
+		auto_reconnect: true,
+		reconnectTries: 10,
+		reconnectInterval: 1000
+	},
+	config: {
+		autoIndex: true
+	},
+	useNewUrlParser: true
 };
 
 module.exports = function (successCallback, errorCallback) {
-    const connectToDatabase = (dbUrl) => {
-        // establish connection to mongodb atlas
-        mongoose.Promise = connectionOptions.promiseLibrary;
+	const connectToDatabase = (dbUrl) => {
+		try {
+			// establish connection to mongodb atlas
+			mongoose.Promise = connectionOptions.promiseLibrary;
 
-        mongoose.connect(dbUrl, connectionOptions);
+			mongoose.connect(dbUrl, connectionOptions);
 
-        const db = mongoose.connection;
+			const db = mongoose.connection;
 
-        db.on('error', (err) => {
-            if (err.message.code === 'ETIMEDOUT') {
-                console.log(err);
+			db.on('error', (err) => {
+				if (err.message.code === 'ETIMEDOUT') {
+					console.log(err);
 
-                mongoose.connect(dbUrl, connectionOptions);
-            }
+					mongoose.connect(dbUrl, connectionOptions);
+				}
 
-            errorCallback();
-        });
+				errorCallback();
+			});
 
 
-        db.once('open', () => {
-            successCallback();
-        });
-    };
+			db.once('open', () => {
+				successCallback();
+			});
+		} catch (ex) {
+			errorCallback();
+		}
+	};
 
-    const watcher = etcd.watcher("db_url");
+	const watcher = etcd.watcher("db_url");
 
-    watcher.on("change", (res) => {
-        connectToDatabase(res.node.value);
-    }); // Triggers on all changes
+	watcher.on("change", (res) => {
+		connectToDatabase(res.node.value);
+	}); // Triggers on all changes
 
-    etcd.get("db_url", (err, res) => {
-        if (err) {
-            console.log(err);
+	etcd.get("db_url", (err, res) => {
+		if (err) {
+			console.log(err);
 
-            return;
-        }
+			return;
+		}
 
-        connectToDatabase(res.node.value);
-    });
+		connectToDatabase(res.node.value);
+	});
 };

@@ -2,7 +2,7 @@ const MetricsApi = require('../api/metricsApi');
 
 const initRoutes = function (server) {
     server.get('/', async function (req, res, next) {
-        const metricsForService = await MetricsApi.getMetricsForService();
+        const metricsForService = await MetricsApi.getAllMetrics();
 
         if (metricsForService) {
             res.json({

@@ -1,18 +1,16 @@
+const healthCheckService = require('../services/healthCheck');
+
+const eventEmitter = require('../services/eventEmitter');
+
 const initRoutes = function (server) {
-    server.get('/health/live', function (req, res, next) {
-        res.json({
-            status: 'OK'
-        });
+    server.get('/health/live', healthCheckService.healthCheck);
 
-        return next();
-    });
+    server.get('/health/ready', healthCheckService.readinessCheck);
 
-    server.get('/health/ready', function (req, res, next) {
-        res.json({
-            status: 'OK'
-        });
+    server.get('/health/unhealthy', (req, res, next) => {
+        eventEmitter.emit('shouldApplicationBeRestarted', true);
 
-        return next();
+        res.send(200);
     });
 };
 

@@ -2,6 +2,8 @@ const restify = require('restify');
 
 const logger = require('./services/logging');
 
+const eventEmitter = require('./services/eventEmitter');
+
 const options = {
     name: 'lpp-metrics',
     version: process.env.npm_package_version
@@ -39,6 +41,10 @@ const onMessageReceived = function (message) {
 
 const rabbitMQ = require('./services/rabbitMQ')(onMessageReceived);
 
+const healthCheck = require('./services/healthCheck');
+
+server.pre(healthCheck.readinessCheckOnEveryRequest);
+
 server.listen(8050, () => {
     console.log(`${options.name} ${options.version} listening at ${server.url}`);
 
@@ -46,10 +52,14 @@ server.listen(8050, () => {
 
     const onDatabaseConnected = function () {
         logger.info(`[${process.env.npm_package_name}] Database connected`);
+
+        eventEmitter.emit('DBConnected', true);
     };
 
     const onDatabaseError = function () {
         logger.info(`[${process.env.npm_package_name}] An error occurred while connecting to database`);
+
+        eventEmitter.emit('DBConnected', false);
     };
 
     require('./services/database')(onDatabaseConnected, onDatabaseError);

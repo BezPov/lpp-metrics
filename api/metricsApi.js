@@ -19,6 +19,10 @@ class MetricsApi {
         }
     }
 
+    static async getAllMetrics() {
+        return MetricModel.find({});
+    }
+
     static async getMetricsForService(serviceName) {
         return MetricModel.find({ 'service.name': serviceName });
     }
