@@ -43,7 +43,7 @@ const rabbitMQ = require('./services/rabbitMQ')(onMessageReceived);
 
 const healthCheck = require('./services/healthCheck');
 
-server.pre(healthCheck.readinessCheckOnEveryRequest);
+server.pre(healthCheck.healthCheckOnEveryRequest, healthCheck.readinessCheckOnEveryRequest);
 
 server.listen(8050, () => {
     console.log(`${options.name} ${options.version} listening at ${server.url}`);

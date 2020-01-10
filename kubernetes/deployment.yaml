@@ -13,7 +13,7 @@ spec:
         app: lpp-metrics
     spec:
       containers:
-        - image: bezpov/lpp-metrics:1.0.3
+        - image: bezpov/lpp-metrics:1.0.4
           name: lpp-metrics-container
           env:
             - name: ETCD_SERVER

@@ -12,6 +12,14 @@ const initRoutes = function (server) {
 
         res.send(200);
     });
+
+    server.get('/health/shutdown', (req, res, next) => {
+        res.send(200, {
+            status: 'server will shutdown'
+        });
+
+        process.exit(1);
+    });
 };
 
 module.exports = initRoutes;

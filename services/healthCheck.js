@@ -19,30 +19,42 @@ eventEmitter.on('shouldApplicationBeRestarted', (restartNeeded) => {
 module.exports = {
 	healthCheck(req, res, next) {
 		if (!shouldApplicationBeRestarted) {
-			res.send(200);
+			res.json(200, {
+				status: 'healthy'
+			});
 		} else {
-			res.send(500);
+			res.json(500, {
+				status: 'unhealthy'
+			});
 		}
 	},
 	healthCheckOnEveryRequest(req, res, next) {
 		if (!shouldApplicationBeRestarted) {
 			next();
 		} else {
-			res.send(500);
+			res.json(500, {
+				status: 'unhealthy'
+			});
 		}
 	},
 	readinessCheck(req, res, next) {
 		if (DBConnected) {
-			res.send(200);
+			res.json(200, {
+				status: 'ready'
+			});
 		} else {
-			res.send(500);
+			res.json(500, {
+				status: 'not_ready'
+			});
 		}
 	},
 	readinessCheckOnEveryRequest(req, res, next) {
 		if (DBConnected) {
 			next();
 		} else {
-			res.send(500);
+			res.json(500, {
+				status: 'ready'
+			});
 		}
 	}
 };
